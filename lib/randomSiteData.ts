@@ -2,7 +2,6 @@ export const randomSiteData: string[] = [
     'https://linear.app',
     'https://trello.com',
     'https://notion.com',
-    'https://asana.com',
     'https://basecamp.com',
     'https://jira.com',
     'https://airtable.com',

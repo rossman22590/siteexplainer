@@ -16,6 +16,7 @@ import { randomSiteData } from "../lib/randomSiteData";
 import { RiNumber1 } from "react-icons/ri";
 import Link from "next/link";
 
+
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [randomizing, setRandomizing] = useState(false);
@@ -62,13 +63,13 @@ const Home: NextPage = () => {
       },
       body: JSON.stringify({
         url: url,
-        summary,
+        summary: summary,
       }),
     }).then(() => fetchLatestSites());
   }
 
   const generateSummary = async (recentURL: string = url) => {
-    setGeneratedSummary("");
+    setGeneratedSummary('');
     setLoading(true);
 
     const isValidURL = (str: string) => {
@@ -82,22 +83,20 @@ const Home: NextPage = () => {
 
     let fullUrl = recentURL.trim();
     if (!/^https?:\/\//i.test(fullUrl)) {
-      fullUrl = "https://" + fullUrl;
+      fullUrl = 'https://' + fullUrl;
     }
+
     console.log(fullUrl);
 
     if (!isValidURL(fullUrl)) {
-      console.error("Invalid URL provided.");
-      // display a toast
-      toast.error("Invalid URL provided", {
-        icon: "❌",
+      console.error('Invalid URL provided.');
+      toast.error('Invalid URL provided', {
+        icon: '❌',
       });
       setLoading(false);
       return;
     }
 
-    console.log("url is", fullUrl);
-    console.log("url is", fullUrl);
     const summary = await fetch('/api/getSummary', {
       method: 'POST',
       headers: {
@@ -107,6 +106,7 @@ const Home: NextPage = () => {
         url: fullUrl,
       })
     });
+
     const summaryData = await summary.json();
     console.table(summaryData);
 
@@ -115,58 +115,246 @@ const Home: NextPage = () => {
       setLoading(false);
       return;
     }
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: fullUrl,
-      }),
-    });
-    console.log("Edge function returned.");
-    console.log("Response is", response);
 
-    if (!response.ok) {
-      const statusText = response.statusText
-        ? response.statusText
-        : "This site isn't valid. Maybe try another?";
+    try {
+      const response = await fetch('/api/fetchWebsiteContent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: fullUrl,
+        }),
+      });
+
+      console.log("fetched and trimmed", response)
+
+      if (!response.ok) {
+        const statusText = response.statusText
+          ? response.statusText
+          : "This site isn't valid. Maybe try another?";
+        toast.error(statusText, {
+          icon: '❌',
+        });
+        setLoading(false);
+        return;
+      }
+
+      const siteContent = await response.text();
+
+      const summaryResponse = await fetch('/api/generateSummaryFromText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: siteContent,
+        }),
+      });
+      console.log("Edge function returned.");
+      console.log("Response is", summaryResponse);
+
+      if (!response.ok) {
+        const statusText = summaryResponse.statusText
+          ? summaryResponse.statusText
+          : "This site isn't valid. Maybe try another?";
+        toast.error(statusText, {
+          icon: "❌",
+        });
+        setLoading(false);
+
+        // throw new Error(response.statusText);
+      }
+
+      // This data is a ReadableStream
+      const data = summaryResponse.body;
+      console.log("Data readable stream", data);
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        setGeneratedSummary((prev) => {
+          const newGeneratedSummary = prev + chunkValue;
+          console.log("summary is ", newGeneratedSummary);
+
+          if (done && newGeneratedSummary.length >= 50) {
+            postSummary(fullUrl, newGeneratedSummary);
+          }
+          return newGeneratedSummary;
+        });
+      }
+
+      setLoading(false);
+    } catch (error) {
+      const statusText = "An unexpected error occured. Try again or try another site"
       toast.error(statusText, {
         icon: "❌",
       });
       setLoading(false);
-
-      // throw new Error(response.statusText);
     }
+  }
 
-    // This data is a ReadableStream
-    const data = response.body;
-    if (!data) {
-      setLoading(false);
-      return;
-    }
+  //   const generateSummary = async (recentURL: string = url) => {
+  //     setGeneratedSummary("");
+  //     setLoading(true);
 
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
+  //     const isValidURL = (str: string) => {
+  //       try {
+  //         new URL(str);
+  //         return true;
+  //       } catch (error) {
+  //         return false;
+  //       }
+  //     };
 
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      setGeneratedSummary((prev) => {
-        const newGeneratedSummary = prev + chunkValue;
-        console.log("summary is ", newGeneratedSummary);
+  //     let fullUrl = recentURL.trim();
+  //     if (!/^https?:\/\//i.test(fullUrl)) {
+  //       fullUrl = "https://" + fullUrl;
+  //     }
+  //     console.log(fullUrl);
 
-        if (done && newGeneratedSummary.length >= 50) {
-          postSummary(fullUrl, newGeneratedSummary);
-        }
-        return newGeneratedSummary;
-      });
-    }
+  //     if (!isValidURL(fullUrl)) {
+  //       console.error("Invalid URL provided.");
+  //       // display a toast
+  //       toast.error("Invalid URL provided", {
+  //         icon: "❌",
+  //       });
+  //       setLoading(false);
+  //       return;
+  //     }
 
-    setLoading(false);
-  };
+  //     console.log("url is", fullUrl);
+  //     console.log("url is", fullUrl);
+  //     const summary = await fetch('/api/getSummary', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         url: fullUrl,
+  //       })
+  //     });
+
+  //     const summaryData = await summary.json();
+  //     console.table(summaryData);
+
+  //     if (summaryData !== null) {
+  //       setGeneratedSummary(summaryData.summary);
+  //       setLoading(false);
+  //       return;
+  //     }
+  // //     const r = await fetch(`https://www.w3.org/services/html2txt?url=${encodeURIComponent(url)}&noinlinerefs=on&nonums=on`, { mode: 'no-cors' });
+  // // console.log("r", r);
+  // try {
+  //   let siteText: string;
+  //   const res = await fetch(
+  //     `https://www.w3.org/services/html2txt?url=${encodeURIComponent(
+  //       fullUrl
+  //     )}&noinlinerefs=on&nonums=on`,
+  //     { mode: 'no-cors' }
+  //   );
+  //   console.log("html response", res)
+  //   if (res.status === 200) {
+  //     siteText = await res.text();
+  //     console.log(siteText)
+  //     if (siteText.length > 200) {
+  //       // The result is valid
+  //       if (siteText.length > 400) {
+  //         siteText = Buffer.from(siteText, 'utf-8').toString()
+  //         siteText = siteText.replace(/(\r\n|\n|\r)/gm, "").replace(/\s+/g, " ").trim() 
+  //         console.log("trimmed", siteText)
+  //         let encoded = encode(siteText)
+  //         encoded = encoded.slice(0,4000)
+  //         siteText = decode(encoded)
+  //         console.log("decoded", siteText)
+  //         siteText = siteText.substring(0, 100)
+
+  //       }
+  //     } else {
+  //       const statusText = "This site doesn't have enough content to summarize"
+  //       toast.error(statusText, {
+  //         icon: "❌",
+  //       });
+  //       setLoading(false);
+  //     }
+  //   } else {
+  //     const statusText = "Could not parse site content"
+  //       toast.error(statusText, {
+  //         icon: "❌",
+  //       });
+  //       setLoading(false);
+  //   }
+
+
+  //     const response = await fetch("/api/generate", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         url: fullUrl,
+  //       }),
+  //     });
+  //     console.log("Edge function returned.");
+  //     console.log("Response is", response);
+
+  //     if (!response.ok) {
+  //       const statusText = response.statusText
+  //         ? response.statusText
+  //         : "This site isn't valid. Maybe try another?";
+  //       toast.error(statusText, {
+  //         icon: "❌",
+  //       });
+  //       setLoading(false);
+
+  //       // throw new Error(response.statusText);
+  //     }
+
+  //     // This data is a ReadableStream
+  //     const data = response.body;
+  //     console.log("Data readable stream", data);
+  //     if (!data) {
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     const reader = data.getReader();
+  //     const decoder = new TextDecoder();
+  //     let done = false;
+
+  //     while (!done) {
+  //       const { value, done: doneReading } = await reader.read();
+  //       done = doneReading;
+  //       const chunkValue = decoder.decode(value);
+  //       setGeneratedSummary((prev) => {
+  //         const newGeneratedSummary = prev + chunkValue;
+  //         console.log("summary is ", newGeneratedSummary);
+
+  //         if (done && newGeneratedSummary.length >= 50) {
+  //           postSummary(fullUrl, newGeneratedSummary);
+  //         }
+  //         return newGeneratedSummary;
+  //       });
+  //     }
+
+  //     setLoading(false);
+  //   } catch (error) {
+  //     const statusText = "An unexpected error occured. Try again or try another site"
+  //       toast.error(statusText, {
+  //         icon: "❌",
+  //       });
+  //       setLoading(false);
+  //   }
+
   function randomizeSite() {
     setRandomizing(true);
     let randomValue =
@@ -199,7 +387,7 @@ const Home: NextPage = () => {
                 viewBox="0 0 418 42"
                 className="absolute top-2/3 left-0 h-[0.58em] w-full fill-blue-300/70"
                 preserveAspectRatio="none">
-                <path d="M203.371.916c-26.013-2.078-76.686 1.963-124.73 9.946L67.3 12.749C35.421 18.062 18.2 21.766 6.004 25.934 1.244 27.561.828 27.778.874 28.61c.07 1.214.828 1.121 9.595-1.176 9.072-2.377 17.15-3.92 39.246-7.496C123.565 7.986 157.869 4.492 195.942 5.046c7.461.108 19.25 1.696 19.17 2.582-.107 1.183-7.874 4.31-25.75 10.366-21.992 7.45-35.43 12.534-36.701 13.884-2.173 2.308-.202 4.407 4.442 4.734 2.654.187 3.263.157 15.593-.78 35.401-2.686 57.944-3.488 88.365-3.143 46.327.526 75.721 2.23 130.788 7.584 19.787 1.924 20.814 1.98 24.557 1.332l.066-.011c1.201-.203 1.53-1.825.399-2.335-2.911-1.31-4.893-1.604-22.048-3.261-57.509-5.556-87.871-7.36-132.059-7.842-23.239-.254-33.617-.116-50.627.674-11.629.54-42.371 2.494-46.696 2.967-2.359.259 8.133-3.625 26.504-9.81 23.239-7.825 27.934-10.149 28.304-14.005.417-4.348-3.529-6-16.878-7.066Z" />
+                <path d="M203.371.916c-26.013-2.078-76.686 1.963-124.73 9.946L67.3 12.749C35.421 18.062 18.2 21.766 6.004 25.934 1.244 27.561.828 27.778.874 28.61c.07 1.214.828 1.121 9.595-1.176 9.072-2.377 17.15-3.92 39.246-7.496C123.565 7.986 157.869 4.492 195.942 5.046c7.461.108 19.25 1.696 19.17 2.582-.107 1.183-7.874 4.31-25.75 10.366-21.992 7.45-35.43 12.534-36.701 13.884-2.173 2.308-.202 4.407 4.generateS442 4.734 2.654.187 3.263.157 15.593-.78 35.401-2.686 57.944-3.488 88.365-3.143 46.327.526 75.721 2.23 130.788 7.584 19.787 1.924 20.814 1.98 24.557 1.332l.066-.011c1.201-.203 1.53-1.825.399-2.335-2.911-1.31-4.893-1.604-22.048-3.261-57.509-5.556-87.871-7.36-132.059-7.842-23.239-.254-33.617-.116-50.627.674-11.629.54-42.371 2.494-46.696 2.967-2.359.259 8.133-3.625 26.504-9.81 23.239-7.825 27.934-10.149 28.304-14.005.417-4.348-3.529-6-16.878-7.066Z" />
               </svg>
               <span className="relative">SiteExplainer</span>
             </span>{" "}
