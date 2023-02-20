@@ -17,6 +17,7 @@ import { RiNumber1 } from "react-icons/ri";
 import Link from "next/link";
 import Faq from "../components/Faq";
 import { FcSearch } from "react-icons/fc";
+import Marquee from "react-fast-marquee";
 
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
@@ -515,43 +516,45 @@ const Home: NextPage = () => {
             </AnimatePresence>
             {latestSites && latestSites.length !== 0 && (
               <div className="px-2 py-2 rounded-lg my-4">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                  <div className=" px-4 py-4 text-center rounded-sm border-2 border-gray-400 shadow-xl sm:max-w-md sm:mx-auto sm:px-6">
+                <div className="w-full mx-auto sm:px-6 lg:px-2">
+                  <div className="max-w-7xl px-1 py-1 text-center sm:mx-auto sm:px-2">
                     <h2 className="text-3xl text-gray-900 font-medium mb-2 dark:text-gray-300">
                       Latest Searches
                     </h2>
-                    <ul>
-                      {latestSites.map((url, index) => (
-                        <AnimatePresence key={`latest-site-${index}`}>
-                          <motion.li
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="text-gray-600"
-                            key={`latest-site-${index}`}>
-                            <button
-                              onClick={() => handleLatestSiteClick(url)}
-                              className="w-full px-4 p-2 mt-4 border-2 font-semibold dark:border-gray-300 border-gray-700 rounded-md flex text-black hover:bg-gray-200 dark:text-white
-                              dark:hover:text-gray-700">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="w-6 h-6">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                                />
-                              </svg>
+                    <ul className="md:max-w-5xl w-full flex  flex-row justify-center md:gap-6 gap-4   items-center mx-auto p-2 rounded-full my-6">
+                      <Marquee gradient={false} className={"rounded-full"}>
+                        {latestSites.map((url, index) => (
+                          <AnimatePresence key={`latest-site-${index}`}>
+                            <motion.li
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="text-gray-600 ml-4"
+                              key={`latest-site-${index}`}>
+                              <button
+                                onClick={() => handleLatestSiteClick(url)}
+                                className="w-full  md:px-3 px-1 md:py-4 py-3 border-[0.5px] font-semibold dark:border-gray-500 shadow-md  bg-gray-300 md:text-md text-sm dark:bg-[#1e293b] border-gray-100 rounded-xl flex flex-row text-black hover:bg-gray-200 dark:text-white
+                              ">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="w-6 h-6">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                                  />
+                                </svg>
 
-                              {url}
-                            </button>
-                          </motion.li>
-                        </AnimatePresence>
-                      ))}
+                                {url}
+                              </button>
+                            </motion.li>
+                          </AnimatePresence>
+                        ))}
+                      </Marquee>
                     </ul>
                   </div>
                 </div>
