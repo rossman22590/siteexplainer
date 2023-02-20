@@ -15,7 +15,8 @@ import BackgroundCircles from "../components/BackgroundCircles";
 import { randomSiteData } from "../lib/randomSiteData";
 import { RiNumber1 } from "react-icons/ri";
 import Link from "next/link";
-
+import Faq from "../components/Faq";
+import { FcSearch } from "react-icons/fc";
 
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
@@ -32,10 +33,9 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (randomizing) {
       setLoading(false);
-      return () => { };
+      return () => {};
     }
   }, [loading]);
-
 
   function fetchLatestSites() {
     setLatestSites([]);
@@ -66,10 +66,10 @@ const Home: NextPage = () => {
         summary: summary,
       }),
     }).then(() => fetchLatestSites());
-  }
+  };
 
   const generateSummary = async (recentURL: string = url) => {
-    setGeneratedSummary('');
+    setGeneratedSummary("");
     setLoading(true);
 
     const isValidURL = (str: string) => {
@@ -83,28 +83,28 @@ const Home: NextPage = () => {
 
     let fullUrl = recentURL.trim();
     if (!/^https?:\/\//i.test(fullUrl)) {
-      fullUrl = 'https://' + fullUrl;
+      fullUrl = "https://" + fullUrl;
     }
 
     console.log(fullUrl);
 
     if (!isValidURL(fullUrl)) {
-      console.error('Invalid URL provided.');
-      toast.error('Invalid URL provided', {
-        icon: '❌',
+      console.error("Invalid URL provided.");
+      toast.error("Invalid URL provided", {
+        icon: "❌",
       });
       setLoading(false);
       return;
     }
 
-    const summary = await fetch('/api/getSummary', {
-      method: 'POST',
+    const summary = await fetch("/api/getSummary", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         url: fullUrl,
-      })
+      }),
     });
 
     const summaryData = await summary.json();
@@ -117,24 +117,24 @@ const Home: NextPage = () => {
     }
 
     try {
-      const response = await fetch('/api/fetchWebsiteContent', {
-        method: 'POST',
+      const response = await fetch("/api/fetchWebsiteContent", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           url: fullUrl,
         }),
       });
 
-      console.log("fetched and trimmed", response)
+      console.log("fetched and trimmed", response);
 
       if (!response.ok) {
         const statusText = response.statusText
           ? response.statusText
           : "This site isn't valid. Maybe try another?";
         toast.error(statusText, {
-          icon: '❌',
+          icon: "❌",
         });
         setLoading(false);
         return;
@@ -142,10 +142,10 @@ const Home: NextPage = () => {
 
       const siteContent = await response.text();
 
-      const summaryResponse = await fetch('/api/generateSummaryFromText', {
-        method: 'POST',
+      const summaryResponse = await fetch("/api/generateSummaryFromText", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           content: siteContent,
@@ -195,13 +195,14 @@ const Home: NextPage = () => {
 
       setLoading(false);
     } catch (error) {
-      const statusText = "An unexpected error occured. Try again or try another site"
+      const statusText =
+        "An unexpected error occured. Try again or try another site";
       toast.error(statusText, {
         icon: "❌",
       });
       setLoading(false);
     }
-  }
+  };
 
   //   const generateSummary = async (recentURL: string = url) => {
   //     setGeneratedSummary("");
@@ -270,7 +271,7 @@ const Home: NextPage = () => {
   //       // The result is valid
   //       if (siteText.length > 400) {
   //         siteText = Buffer.from(siteText, 'utf-8').toString()
-  //         siteText = siteText.replace(/(\r\n|\n|\r)/gm, "").replace(/\s+/g, " ").trim() 
+  //         siteText = siteText.replace(/(\r\n|\n|\r)/gm, "").replace(/\s+/g, " ").trim()
   //         console.log("trimmed", siteText)
   //         let encoded = encode(siteText)
   //         encoded = encoded.slice(0,4000)
@@ -293,7 +294,6 @@ const Home: NextPage = () => {
   //       });
   //       setLoading(false);
   //   }
-
 
   //     const response = await fetch("/api/generate", {
   //       method: "POST",
@@ -364,11 +364,22 @@ const Home: NextPage = () => {
   }
 
   return (
-    <>
+    <div className="dark:bg-[#111a31] bg-gray-50">
+      <div className="">
+        <div className="w-full md:text-lg text-xs bg-[#7721c1] text-center hover:cursor-pointer font-semibold text-white h-8 items-center z-10">
+          Build by @michael_chomsky & Sponsored By{" "}
+          <a
+            href="mailto: contact@siteexplainer.com"
+            className="text-white hover:cursor-pointer underline md:text-xl text-md w-full">
+            [your product Name]
+          </a>
+          👍
+        </div>
+      </div>
       <div>
         <Toaster />
       </div>
-      <div className="flex max-w-5xl mx-auto flex-col items-center justify-center py-2 min-h-screen">
+      <div className="flex max-w-5xl mx-auto flex-col items-center justify-center min-h-screen">
         <Head>
           <title>SiteExplainer</title>
           <link rel="icon" href="/favicon.ico" />
@@ -425,42 +436,43 @@ const Home: NextPage = () => {
                 {/* . */}
               </p>
             </div>
-            <textarea
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              rows={4}
-              className="w-full rounded-md border-gray-700  shadow-lg dark:bg-gray-200 bg-gray-100 focus:border-1 dark:text-black focus:ring-black my-5"
-              placeholder={"thislandingpagemakesnosense.com"}
-            />
-            <div className="flex flex-row gap-4  md:gap-8 justify-center mt-4">
+            <div className="flex flex-row items-center px-4">
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full rounded-l-md border-gray-100  shadow-lg dark:bg-gray-200 bg-gray-100 focus:border-1 outline-none  dark:text-black my-5 p-3"
+                placeholder={"thislandingpagemakesnosense.com"}
+              />
+              <FcSearch className="text-5xl dark:bg-gray-200 bg-gray-100 p-2 rounded-r-md text-black" />
+            </div>
+            <div className="flex md:flex-row flex-col gap-4  md:gap-8 justify-center mt-4 px-4">
               {!loading && (
                 <button
-                  className="custom-btn btn-3 text-lg font-semibold"
+                  className="bg-[#7721c1] md:w-1/3 w-full rounded-xl shadow-inner shadow-gray-400  duration-100 hover:bg-[#6813b2] hover:scale-105 py-3 text-lg font-semibold text-white text-center"
                   onClick={(e) => {
                     e.preventDefault();
                     generateSummary();
-                  }}
-                >
+                  }}>
                   <span>Explain &rarr;</span>
                 </button>
               )}
               {loading && (
                 <button
-                  className="custom-btn btn-3 text-lg font-semibold"
+                  className="bg-[#7721c1] rounded-xl md:w-1/3 w-full shadow-inner shadow-gray-400  duration-100 hover:bg-[#6813b2] text-lg font-semibold py-3"
                   disabled>
                   <LoadingDots color="white" style="large" />
                 </button>
               )}
               {!randomizing && (
                 <button
-                  className="custom-btn btn-7 text-md font-semibold"
+                  className="bg-[#c5c2c2] shadow-inner  duration-100 hover:bg-[#b3b0b0] shadow-gray-400 rounded-xl md:w-1/3 w-full text-lg font-semibold py-3 text-black text-center hover:scale-105"
                   onClick={randomizeSite}>
                   <span>Random site &rarr;</span>
                 </button>
               )}
               {randomizing && (
                 <button
-                  className="custom-btn btn-7 text-md font-semibold"
+                  className="bg-[#c5c2c2] rounded-xl md:w-1/3 w-full  duration-100 hover:bg-[#b3b0b0]  shadow-inner shadow-gray-400 text-md font-semibold py-3"
                   disabled>
                   <LoadingDots color="white" style="large" />
                 </button>
@@ -547,9 +559,10 @@ const Home: NextPage = () => {
             )}
           </ResizablePanel>
         </main>
-        <Footer />
+        <Faq />
       </div>
-    </>
+      <Footer />
+    </div>
   );
 };
 
