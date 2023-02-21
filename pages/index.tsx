@@ -34,7 +34,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (randomizing) {
       setLoading(false);
-      return () => {};
+      return () => { };
     }
   }, [loading]);
 
@@ -205,157 +205,6 @@ const Home: NextPage = () => {
     }
   };
 
-  //   const generateSummary = async (recentURL: string = url) => {
-  //     setGeneratedSummary("");
-  //     setLoading(true);
-
-  //     const isValidURL = (str: string) => {
-  //       try {
-  //         new URL(str);
-  //         return true;
-  //       } catch (error) {
-  //         return false;
-  //       }
-  //     };
-
-  //     let fullUrl = recentURL.trim();
-  //     if (!/^https?:\/\//i.test(fullUrl)) {
-  //       fullUrl = "https://" + fullUrl;
-  //     }
-  //     console.log(fullUrl);
-
-  //     if (!isValidURL(fullUrl)) {
-  //       console.error("Invalid URL provided.");
-  //       // display a toast
-  //       toast.error("Invalid URL provided", {
-  //         icon: "❌",
-  //       });
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     console.log("url is", fullUrl);
-  //     console.log("url is", fullUrl);
-  //     const summary = await fetch('/api/getSummary', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({
-  //         url: fullUrl,
-  //       })
-  //     });
-
-  //     const summaryData = await summary.json();
-  //     console.table(summaryData);
-
-  //     if (summaryData !== null) {
-  //       setGeneratedSummary(summaryData.summary);
-  //       setLoading(false);
-  //       return;
-  //     }
-  // //     const r = await fetch(`https://www.w3.org/services/html2txt?url=${encodeURIComponent(url)}&noinlinerefs=on&nonums=on`, { mode: 'no-cors' });
-  // // console.log("r", r);
-  // try {
-  //   let siteText: string;
-  //   const res = await fetch(
-  //     `https://www.w3.org/services/html2txt?url=${encodeURIComponent(
-  //       fullUrl
-  //     )}&noinlinerefs=on&nonums=on`,
-  //     { mode: 'no-cors' }
-  //   );
-  //   console.log("html response", res)
-  //   if (res.status === 200) {
-  //     siteText = await res.text();
-  //     console.log(siteText)
-  //     if (siteText.length > 200) {
-  //       // The result is valid
-  //       if (siteText.length > 400) {
-  //         siteText = Buffer.from(siteText, 'utf-8').toString()
-  //         siteText = siteText.replace(/(\r\n|\n|\r)/gm, "").replace(/\s+/g, " ").trim()
-  //         console.log("trimmed", siteText)
-  //         let encoded = encode(siteText)
-  //         encoded = encoded.slice(0,4000)
-  //         siteText = decode(encoded)
-  //         console.log("decoded", siteText)
-  //         siteText = siteText.substring(0, 100)
-
-  //       }
-  //     } else {
-  //       const statusText = "This site doesn't have enough content to summarize"
-  //       toast.error(statusText, {
-  //         icon: "❌",
-  //       });
-  //       setLoading(false);
-  //     }
-  //   } else {
-  //     const statusText = "Could not parse site content"
-  //       toast.error(statusText, {
-  //         icon: "❌",
-  //       });
-  //       setLoading(false);
-  //   }
-
-  //     const response = await fetch("/api/generate", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         url: fullUrl,
-  //       }),
-  //     });
-  //     console.log("Edge function returned.");
-  //     console.log("Response is", response);
-
-  //     if (!response.ok) {
-  //       const statusText = response.statusText
-  //         ? response.statusText
-  //         : "This site isn't valid. Maybe try another?";
-  //       toast.error(statusText, {
-  //         icon: "❌",
-  //       });
-  //       setLoading(false);
-
-  //       // throw new Error(response.statusText);
-  //     }
-
-  //     // This data is a ReadableStream
-  //     const data = response.body;
-  //     console.log("Data readable stream", data);
-  //     if (!data) {
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     const reader = data.getReader();
-  //     const decoder = new TextDecoder();
-  //     let done = false;
-
-  //     while (!done) {
-  //       const { value, done: doneReading } = await reader.read();
-  //       done = doneReading;
-  //       const chunkValue = decoder.decode(value);
-  //       setGeneratedSummary((prev) => {
-  //         const newGeneratedSummary = prev + chunkValue;
-  //         console.log("summary is ", newGeneratedSummary);
-
-  //         if (done && newGeneratedSummary.length >= 50) {
-  //           postSummary(fullUrl, newGeneratedSummary);
-  //         }
-  //         return newGeneratedSummary;
-  //       });
-  //     }
-
-  //     setLoading(false);
-  //   } catch (error) {
-  //     const statusText = "An unexpected error occured. Try again or try another site"
-  //       toast.error(statusText, {
-  //         icon: "❌",
-  //       });
-  //       setLoading(false);
-  //   }
-
   function randomizeSite() {
     setRandomizing(true);
     let randomValue =
@@ -508,11 +357,13 @@ const Home: NextPage = () => {
                           });
                         }}>
                         <p className={"dark:text-black"}>{generatedSummary}</p>
-                        <a href="https://twitter.com/intent/tweet?text=Check%20out%20my%20summary%20from%20SiteExplainer%20%F0%9F%94%A5%20https%3A%2F%2Fsiteexplainer.com&hashtags=siteexplainer"
-                        target="_blank" className="text-[#1da1f2] font-medium text-sm px-5 py-2.5 text-center inline-flex items-center hover:opacity-80">
-              <svg className="w-4 h-4 mr-2 -ml-1" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="twitter" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M459.4 151.7c.325 4.548 .325 9.097 .325 13.65 0 138.7-105.6 298.6-298.6 298.6-59.45 0-114.7-17.22-161.1-47.11 8.447 .974 16.57 1.299 25.34 1.299 49.06 0 94.21-16.57 130.3-44.83-46.13-.975-84.79-31.19-98.11-72.77 6.498 .974 12.99 1.624 19.82 1.624 9.421 0 18.84-1.3 27.61-3.573-48.08-9.747-84.14-51.98-84.14-102.1v-1.299c13.97 7.797 30.21 12.67 47.43 13.32-28.26-18.84-46.78-51.01-46.78-87.39 0-19.49 5.197-37.36 14.29-52.95 51.65 63.67 129.3 105.3 216.4 109.8-1.624-7.797-2.599-15.92-2.599-24.04 0-57.83 46.78-104.9 104.9-104.9 30.21 0 57.5 12.67 76.67 33.14 23.72-4.548 46.46-13.32 66.6-25.34-7.798 24.37-24.37 44.83-46.13 57.83 21.12-2.273 41.58-8.122 60.43-16.24-14.29 20.79-32.16 39.31-52.63 54.25z"></path></svg>
-              Share on Twitter
-            </a>
+                        //link should include summary:
+
+                        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my summary from SiteExplainer.com 🔥 \n${generatedSummary}`)}`}
+                          target="_blank" className="text-[#1da1f2] font-medium text-sm px-5 py-2.5 text-center inline-flex items-center hover:opacity-80">
+                          <svg className="w-4 h-4 mr-2 -ml-1" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="twitter" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M459.4 151.7c.325 4.548 .325 9.097 .325 13.65 0 138.7-105.6 298.6-298.6 298.6-59.45 0-114.7-17.22-161.1-47.11 8.447 .974 16.57 1.299 25.34 1.299 49.06 0 94.21-16.57 130.3-44.83-46.13-.975-84.79-31.19-98.11-72.77 6.498 .974 12.99 1.624 19.82 1.624 9.421 0 18.84-1.3 27.61-3.573-48.08-9.747-84.14-51.98-84.14-102.1v-1.299c13.97 7.797 30.21 12.67 47.43 13.32-28.26-18.84-46.78-51.01-46.78-87.39 0-19.49 5.197-37.36 14.29-52.95 51.65 63.67 129.3 105.3 216.4 109.8-1.624-7.797-2.599-15.92-2.599-24.04 0-57.83 46.78-104.9 104.9-104.9 30.21 0 57.5 12.67 76.67 33.14 23.72-4.548 46.46-13.32 66.6-25.34-7.798 24.37-24.37 44.83-46.13 57.83 21.12-2.273 41.58-8.122 60.43-16.24-14.29 20.79-32.16 39.31-52.63 54.25z"></path></svg>
+                          Share on Twitter
+                        </a>
                       </div>
                     </div>
                   </>
