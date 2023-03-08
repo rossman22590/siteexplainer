@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { useRouter } from 'next/router';
 
 interface VoteButtonProps {
@@ -24,12 +24,21 @@ const VoteButton: React.FC<VoteButtonProps> = ({
     setLoading(true);
     const ipAddress = router.asPath.split('/')[2];
     try {
-      const response = await axios.post('/api/vote', {
-        postId,
-        isUpvote,
-        ipAddress,
+      // const response = await axios.post('/api/vote', {
+      //   postId,
+      //   isUpvote,
+      //   ipAddress,
+      // });
+      const response = await fetch('/api/vote', {
+        method: 'POST',
+        body: JSON.stringify({
+          postId,
+          isUpvote,
+          ipAddress,
+        }),
       });
-      const newVote = response.data.newVote;
+
+      const newVote = await response.json();
       onVote(newVote);
     } catch (error) {
       console.error(error);
