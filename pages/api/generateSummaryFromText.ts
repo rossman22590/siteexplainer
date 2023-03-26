@@ -27,21 +27,20 @@ const handler = async (req: Request): Promise<Response> => {
 
   "${content}"
 
-  Detailed summary of no more than 200 words:
+  Write a detailed summary of the above website, make sure the length of your summary is at most 200 words.
   `
 
     const payload: OpenAIStreamPayload = {
-      model: "text-davinci-003",
-      prompt,
-      temperature: 0.5,
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
       max_tokens: 400,
       stream: true,
       n: 1,
-      suffix: "\"\"\""
-    };
+  };
 
     const stream = await OpenAIStream(payload);
     return new Response(stream);
